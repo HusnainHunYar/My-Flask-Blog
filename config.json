@@ -1,0 +1,27 @@
+{
+  "parameters":
+  {
+    "local_server": "True",
+    "local_uri": "mysql+mysqlconnector://root:@localhost/codecrafthub",
+    "production_uri": "mysql+mysqlconnector://root:@localhost/codecrafthub",
+    "fb_url": "https://www.facebook.com/profile.php?id=100027346245826",
+    "x_url": "https://twitter.com/HusnainHunYar1",
+    "github_url": "https://github.com/HusnainHunYar",
+    "blog_name": "CodeCraftsHub",
+    "tagline": "Tech Blogs By MHS",
+    "gmail_username": "husnain.shahid.waada@gmail.com",
+    "gmail_password": "ftio jqyj alsl ltul",
+    "no_of_posts": 2,
+    "login_image": "login.svg",
+    "upload_location": "C:\\Users\\nas\\OneDrive\\Desktop\\python_workspace\\Flask_python\\static"
+  },
+  "my_about":
+  {
+    "name": "Muhammad Husnain Shahid",
+    "profession": "Software Engineer",
+    "current_project": "Python Flask",
+    "future_goal": "Python Django Full Stack Developer",
+    "blog_description": "On this blog, I'll be sharing insights, discoveries, and challenges encountered as I navigate the dynamic landscape of software development. From Python Flask tutorials to glimpses into my learning journey, expect a blend of technical content and personal reflections.",
+    "message": "Whether you're a fellow developer, a tech enthusiast, or someone curious about the world of coding, I invite you to join me on this exciting path. Let's learn, grow, and build together!"
+  }
+}

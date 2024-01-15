@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block body %}
+       
+     <!-- Page Header-->
+       <header class="masthead" style="background-image: url('static/assets/img/coding-bg.jpg')">
+            <div class="container position-relative px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-md-10 col-lg-8 col-xl-7">
+                        <div class="page-heading">
+                            <h1> Exploring MHS's World </h1>
+                            <span class="subheading"><b>Crafting My Narrative</b></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content-->
+        <main class="mb-4">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-md-10 col-lg-8 col-xl-7">
+                        <p>Hello, I'm <b>{{my_about['name']}}</b>, a passionate {{my_about['profession']}} on a journey towards becoming a {{my_about['future_goal']}}. Currently, I'm immersed in the world of {{my_about['current_project']}}, and this blog is a reflection of my exploration and experiences.</p>
+
+                        <p><b>What to Expect</b> <br>
+                        {{my_about['blog_description']}}</p>
+
+                        <p> <b>Join Me on the Journey</b> <br>
+                         {{my_about['message']}} 
+                         <br>
+                         <br>
+                         Thank you for being part of my coding adventures. </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+{% endblock %}

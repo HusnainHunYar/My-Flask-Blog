@@ -1,0 +1,29 @@
+html,
+body {
+  height: 100%;
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+}
+
+.form-signin {
+  max-width: 330px;
+  padding: 1rem;
+  background-color: #fff; /* Set a background color for the form */
+  border-radius: 8px; /* Optional: Add border-radius for rounded corners */
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-signin input[type="text"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}

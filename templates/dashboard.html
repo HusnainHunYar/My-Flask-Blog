@@ -1,0 +1,92 @@
+{% extends "layout1.html" %}
+{% block body %}
+<!-- Page Header-->
+
+<header class="masthead" style="background-image: url('static/assets/img/admin-bg.jpg')">
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="site-heading">
+          <h1>Admin Panel</h1>
+          <span class="subheading">Manage your posts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-md-10 mx-auto">
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div id="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message alert alert-dismissible fade show {{ 'alert-' + category }}" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <h1>Upload a File</h1>
+      <form action="/uploader" method="post" enctype="multipart/form-data">
+        <input type="file" name="file1">
+        <button type="submit" class="btn btn-success btn-sm">Submit</button>
+      </form>
+
+      <hr>
+      <h1>Post Manager</h1>
+      <table class="table table-striped col-lg-8 col-md-10 mx-auto">
+        <thead>
+          <tr>
+            <th>Srl_num</th>
+            <th>Post Title</th>
+            <th>Date</th>
+            <th>Edit Post</th>
+            <th>Delete Post</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          {% for post in posts %}
+          <tr>
+            <td>{{post.srl_num}}</td>
+            <td>{{post.title}}</td>
+            <td>{{post.date}}</td>
+            <td> <a href="/edit/{{post.srl_num}}"> <button class="btn btn-secondary">Edit</button> </a> </td>
+            <td> <a href="/delete/{{post.srl_num}}"> <button class="btn btn-danger">Delete</button> </a> </td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Automatically close flash messages after 3 seconds
+  document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+      var flashMessages = document.getElementById('flash-container');
+      if (flashMessages) {
+        flashMessages.innerHTML = ''; // Clear the flash messages container
+      }
+    }, 3000);
+  });
+
+  // Enable manual closing of flash messages
+  document.addEventListener('click', function (event) {
+    if (event.target.classList.contains('btn-close')) {
+      var flashMessage = event.target.closest('.flash-message');
+      if (flashMessage) {
+        flashMessage.remove(); // Remove the clicked flash message
+      }
+    }
+  });
+</script>
+{% endblock %}
