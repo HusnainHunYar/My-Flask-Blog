@@ -1,8 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, flash, url_for
 from sqlalchemy.exc import SQLAlchemyError
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField, validators
-from wtforms.validators import DataRequired, Email
+from forms import SignupForm, SigninForm
 import bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
@@ -35,23 +33,6 @@ if local_server:
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = parameters['production_uri']
 db = SQLAlchemy(app)
-
-
-class SignupForm(FlaskForm):  # this is WT Form Class for sign-up
-    user_name = StringField("Name", validators=[DataRequired()])
-    user_email = EmailField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[
-        validators.InputRequired(),
-        validators.EqualTo('password', message='Passwords must match')
-    ])
-    submit = SubmitField("Signup")
-
-
-class SigninForm(FlaskForm):  # this is WT Form class for sign-in
-    user_email = EmailField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    submit = SubmitField("Signup")
 
 
 # Schemas starts here
