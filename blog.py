@@ -108,9 +108,9 @@ def signin():
                 session['user'] = user_email
                 return redirect(url_for('dashboard'))
             else:
-                flash("Incorrect password. Please try again with the correct password.", 'danger')
+                flash("Invalid Email or Password.", 'danger')
         else:
-            flash("User not found with this email. Please check your email and try again.", 'danger')
+            flash("Invalid Email or Password.", 'danger')
 
     return render_template('sign-in.html', form=form, parameters=parameters)
 
@@ -178,8 +178,19 @@ def dashboard():
 def delete(srl_num):
     if "user" in session:
         posts = Posts.query.filter_by(srl_num=srl_num).first()
-        db.session.delete(posts)
+
+        if posts:
+            db.session.delete(posts)
+
+    # Update serial numbers for remaining posts
+        remaining_posts = Posts.query.order_by(Posts.srl_num).all()
+        for idx, remaining_post in enumerate(remaining_posts, start=1):
+            remaining_post.srl_num = idx
+
         db.session.commit()
+
+        flash('Post deleted successfully', 'success')
+
     return redirect("/dashboard")
 
 
@@ -209,6 +220,8 @@ def edit(srl_num):
                 posts = Posts(title=title, slug=slug, content=content, tagline=tagline, img_file=img_file, date=date)
                 db.session.add(posts)
                 db.session.commit()
+                flash("Post Added successfully.", "success")
+                return redirect('/dashboard')
             else:
                 posts = Posts.query.filter_by(srl_num=srl_num).first()
                 posts.title = title
@@ -218,7 +231,8 @@ def edit(srl_num):
                 posts.img_file = img_file
                 posts.date = date
                 db.session.commit()
-                return redirect('/edit/' + srl_num)
+                flash("Post updated successfully.", "success")
+                return redirect('/dashboard')
 
         posts = Posts.query.filter_by(srl_num=srl_num).first()
         return render_template('edit.html', parameters=parameters, posts=posts, srl_num=srl_num)
