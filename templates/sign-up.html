@@ -152,6 +152,16 @@
                 </ul>
                 {% endif %}
             </div>
+            <div class="row justify-content-center">
+                {{ form.confirm_password(type="password", class="form-control", required=true, placeholder="Confirm Password") }}
+                {% if form.confirm_password.errors %}
+                <ul class="text-danger">
+                    {% for error in form.confirm_password.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
             {{ form.submit(class="btn btn-md btn-success", type="submit", value="Signup")}}
             <div class="message">
                 <a href="/signin" class="text-black">Already have an account? Sign in</a>

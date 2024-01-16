@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, flash, url_for
 from sqlalchemy.exc import SQLAlchemyError
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField
+from wtforms import StringField, PasswordField, SubmitField, EmailField, validators
 from wtforms.validators import DataRequired, Email
 import bcrypt
 from flask_sqlalchemy import SQLAlchemy
@@ -41,6 +41,10 @@ class SignupForm(FlaskForm):  # this is WT Form Class for sign-up
     user_name = StringField("Name", validators=[DataRequired()])
     user_email = EmailField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[
+        validators.InputRequired(),
+        validators.EqualTo('password', message='Passwords must match')
+    ])
     submit = SubmitField("Signup")
 
 
