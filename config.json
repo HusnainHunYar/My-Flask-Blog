@@ -2,8 +2,8 @@
   "parameters":
   {
     "local_server": "True",
-    "local_uri": "mysql+mysqlconnector://root:@localhost/codecrafthub",
-    "production_uri": "mysql+mysqlconnector://root:@localhost/codecrafthub",
+    "local_uri": "mysql+mysqlconnector://root:@localhost/codecraftshub",
+    "production_uri": "mysql+mysqlconnector://root:@localhost/codecraftshub",
     "fb_url": "https://www.facebook.com/profile.php?id=100027346245826",
     "x_url": "https://twitter.com/HusnainHunYar1",
     "github_url": "https://github.com/HusnainHunYar",
