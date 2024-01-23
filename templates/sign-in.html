@@ -19,7 +19,7 @@
     <!-- Add any additional CSS links or styles here -->
     <style>
         body {
-            background-image: url('static/assets/img/sign-in-bg.jpg');
+            background-image: url("{{ url_for('static', filename='assets/img/sign-in-bg.jpg') }}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -63,7 +63,7 @@
             </div>
         </nav>
 
-        <form class="form-sign-in mx-auto mt-5" action="/signin" method="post">
+        <form class="form-sign-in mx-auto mt-5" action="{{ url_for('auth.signin') }}" method="post">
 
             {% set fname = 'assets/img/' + parameters['login_image'] %}
             <img class="mb-4" src="{{ url_for('static', filename=fname) }}" alt="" width="75" height="75">
@@ -115,7 +115,7 @@
                 {{ form.submit(class="btn btn-md btn-success", type="submit", value="Signin")}}
                 <div class="mt-3">
                     <span class="text-black">Don't have an account? </span>
-                    <a href="/signup" class="btn btn-secondary">Sign Up</a>
+                    <a href="{{ url_for('auth.sign_up') }}" class="btn btn-secondary">Sign Up</a>
                 </div>
             </div>
         </form>

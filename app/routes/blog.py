@@ -1,8 +1,7 @@
-from flask import Flask, render_template, request, session, redirect, flash, url_for
+from flask import Flask, render_template, request, session, redirect, flash, url_for, Blueprint
 from sqlalchemy.exc import SQLAlchemyError
-from forms import SignupForm, SigninForm
-import bcrypt
-from flask_sqlalchemy import SQLAlchemy
+from flask_caching import Cache
+from app.models import Posts, Contacts, db
 from flask_mail import Mail
 import json
 from datetime import datetime
@@ -19,7 +18,6 @@ local_server = True
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = parameters['upload_location']
-app.secret_key = 'super-secret-key'
 app.config.update(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT='465',
@@ -27,103 +25,14 @@ app.config.update(
     MAIL_USERNAME=parameters['gmail_username'],
     MAIL_PASSWORD=parameters['gmail_password']
 )
+
 mail = Mail(app)
-if local_server:
-    app.config["SQLALCHEMY_DATABASE_URI"] = parameters['local_uri']
-else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = parameters['production_uri']
-db = SQLAlchemy(app)
+
+bp = Blueprint("blog", __name__)
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 
-# Schemas starts here
-class Users(db.Model):
-    user_id = db.Column(db.Integer, primary_key=True)
-    user_name = db.Column(db.String(80), nullable=False)
-    user_email = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(250), nullable=False)
-
-
-class Contacts(db.Model):
-    srl_num = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
-    email = db.Column(db.String(20), nullable=False)
-    phone_num = db.Column(db.String(12), nullable=False)
-    msg = db.Column(db.String(150), nullable=False)
-    date = db.Column(db.String(12), nullable=True)
-
-
-class Posts(db.Model):
-    srl_num = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(80), nullable=False)
-    tagline = db.Column(db.String(50), nullable=False)
-    slug = db.Column(db.String(30), nullable=False)
-    content = db.Column(db.String(150), nullable=False)
-    date = db.Column(db.String(12), nullable=True)
-    img_file = db.Column(db.String(12), nullable=True)
-
-
-with app.app_context():
-    # Create tables based on the models
-    db.create_all()
-
-
-@app.route("/signup", methods=['GET', 'POST'])
-def sign_up():
-    form = SignupForm()
-    if form.validate_on_submit():
-        user_name = form.user_name.data
-        user_email = form.user_email.data
-        password = form.password.data
-
-        existing_user = Users.query.filter_by(user_email=user_email).first()
-
-        if existing_user:
-            flash("User with this Email already exists. Please use a different email.", 'warning')
-            return redirect(url_for('sign_up'))
-        else:
-            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            # store data into database
-            entry = Users(user_name=user_name, user_email=user_email, password=hashed_password)
-            db.session.add(entry)
-            db.session.commit()
-            flash("Sign up successful.")
-
-        return redirect(url_for('signin'))
-
-    return render_template('sign-up.html', form=form, parameters=parameters)
-
-
-@app.route('/signin', methods=['GET', 'POST'])
-def signin():
-    form = SigninForm()
-    if form.validate_on_submit():
-        user_email = form.user_email.data
-        password = form.password.data
-
-        user = Users.query.filter_by(user_email=user_email).first()
-
-        if user:
-            if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                flash("Login successful. Welcome!", 'success')
-                session['user'] = user_email
-                return redirect(url_for('dashboard'))
-            else:
-                flash("Invalid Email or Password.", 'danger')
-        else:
-            flash("Invalid Email or Password.", 'danger')
-
-    return render_template('sign-in.html', form=form, parameters=parameters)
-
-
-@app.route('/sign_out')
-def sign_out():
-    if 'user' in session:
-        session.pop('user')
-        flash("You have been logged out successfully.", "success")
-    return redirect('/signin')
-
-
-@app.route("/")
+@bp.route("/")
 def home():
     posts = Posts.query.filter_by().all()
     last = math.ceil(len(posts) / int(parameters['no_of_posts']))
@@ -140,24 +49,24 @@ def home():
 
     if page == 1:
         previous = "#"
-        next_page = "/?page=" + str(page + 1)
+        next_page = url_for('blog.home', page=page + 1)
     elif page == last:
-        previous = "/?page=" + str(page - 1)
+        previous = url_for('blog.home', page=page - 1)
         next_page = "#"
     else:
-        previous = "/?page=" + str(page - 1)
-        next_page = "/?page=" + str(page + 1)
+        previous = url_for('blog.home', page=page - 1)
+        next_page = url_for('blog.home', page=page + 1)
 
     return render_template('index.html', parameters=parameters, posts=posts_to_display,
                            previous=previous, next=next_page)
 
 
-@app.route("/about")
+@bp.route("/about")
 def about():
     return render_template('about.html', parameters=parameters, my_about=my_about)
 
 
-@app.route("/dashboard", methods=['GET', 'POST'])
+@bp.route("/dashboard", methods=['GET', 'POST'])
 def dashboard():
     if 'user' in session:
         posts = Posts.query.all()
@@ -171,10 +80,10 @@ def dashboard():
             return render_template('dashboard.html', parameters=parameters, posts=posts)
 
     flash("Please sign in to access the dashboard.", 'danger')
-    return redirect(url_for('signin'))
+    return redirect(url_for('auth.signin'))
 
 
-@app.route("/delete/<string:srl_num>", methods=['GET', 'POST'])
+@bp.route("/delete/<string:srl_num>", methods=['GET', 'POST'])
 def delete(srl_num):
     if "user" in session:
         posts = Posts.query.filter_by(srl_num=srl_num).first()
@@ -182,30 +91,25 @@ def delete(srl_num):
         if posts:
             db.session.delete(posts)
 
-    # Update serial numbers for remaining posts
-        remaining_posts = Posts.query.order_by(Posts.srl_num).all()
-        for idx, remaining_post in enumerate(remaining_posts, start=1):
-            remaining_post.srl_num = idx
+            remaining_posts = Posts.query.order_by(Posts.srl_num).all()
+            for idx, remaining_post in enumerate(remaining_posts, start=1):
+                remaining_post.srl_num = idx
 
-        db.session.commit()
+            db.session.commit()
 
-        flash('Post deleted successfully', 'success')
+            flash('Post deleted successfully', 'success')
 
-    return redirect("/dashboard")
+    return redirect(url_for("blog.dashboard"))
 
 
-@app.route("/post/<string:post_slug>", methods=['GET'])
+@bp.route("/post/<string:post_slug>", methods=['GET'])
 def post(post_slug):
     posts = Posts.query.filter_by(slug=post_slug).first()
 
     return render_template('post.html', parameters=parameters, post=posts)
 
 
-#  Reset the auto-increment counter to a specific value (e.g., 1)
-# ALTER TABLE your_table AUTO_INCREMENT = 1;
-
-
-@app.route("/edit/<string:srl_num>", methods=['GET', 'POST'])
+@bp.route("/edit/<string:srl_num>", methods=['GET', 'POST'])
 def edit(srl_num):
     if "user" in session:
         if request.method == "POST":
@@ -238,7 +142,6 @@ def edit(srl_num):
         return render_template('edit.html', parameters=parameters, posts=posts, srl_num=srl_num)
     return redirect('/dashboard')
 
-
 # Uploader Starts Here
 
 
@@ -249,7 +152,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route("/uploader", methods=['GET', 'POST'])
+@bp.route("/uploader", methods=['GET', 'POST'])
 def uploader():
     if "user" in session:
         if request.method == 'POST':
@@ -259,53 +162,40 @@ def uploader():
                 flash("File uploaded successfully!", "success")
             else:
                 flash("Invalid file format. Please upload a valid image file (jpg, jpeg, png, gif).", "error")
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('blog.dashboard'))
 
 
-@app.route("/contact", methods=['GET', 'POST'])
+@bp.route("/contact", methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
-        # Fetch data from the form
         name = request.form.get('name')
         email = request.form.get('email')
         phone = request.form.get('phone')
         message = request.form.get('message')
 
-        # Check if any of the required fields is empty
         if not name or not email or not phone or not message:
             flash('Please fill out all required fields.', 'warning')
-            return redirect(url_for('contact'))
+            return redirect(url_for('blog.contact'))
 
         try:
-            # Add entry to the database
             entry = Contacts(name=name, phone_num=phone, msg=message, date=datetime.now(), email=email)
             db.session.add(entry)
             db.session.commit()
 
-            # Send email
             mail.send_message('New message from ' + name,
                               sender=email,
                               recipients=[parameters['gmail_username']],
                               body=message + "\n" + phone
                               )
 
-            # Display a success flash message
             flash('Your message has been sent successfully!', 'success')
-
-            # Redirect to the contact page
-            return redirect(url_for('contact'))
+            return redirect(url_for('blog.contact'))
 
         except SQLAlchemyError as db_error:
-            # Handle database-related exceptions
             db.session.rollback()
             flash(f'Database error: {db_error}. Please try again later.', 'error')
 
         except Exception as other_error:
-            # Handle other exceptions
             flash(f'An unexpected error occurred: {other_error}. Please try again later.', 'error')
 
     return render_template('contact.html', parameters=parameters)
-
-
-if __name__ == '__main__':
-    app.run(debug=True)

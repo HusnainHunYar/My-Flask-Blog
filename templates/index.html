@@ -1,50 +1,59 @@
 {% extends "layout.html" %}
 {% block body %}
 
-        <!-- Page Header-->
-    <header class="masthead" style="background-image: url('static/assets/img/home1-bg.jpg')">
-            <div class="container position-relative px-4 px-lg-5">
-                <div class="row gx-4 gx-lg-5 justify-content-center">
-                    <div class="col-md-10 col-lg-8 col-xl-7">
-                        <div class="site-heading">
-                           <emp><h2>Unveiling the Secrets of Tech Innovation</h2></emp>
-                         <span class="subheading">{{parameters['tagl']}}</span>
+<!-- Page Header-->
+<header class="masthead" style="background-image: url('static/assets/img/home1-bg.jpg');">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="site-heading">
+                    <emp>
+                        <h2>Unveiling the Secrets of Tech Innovation</h2>
+                    </emp>
+                    <span class="subheading">{{parameters['tagline']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content-->
+<div class="container-fluid px-0 bg-light">
+    <div class="container py-5">
+        <div class="row gx-0 justify-content-center">
+            <div class="col-md-12 col-lg-10 col-xl-8">
+                <!-- Post previews as cards -->
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    {% for post in posts %}
+                    <div class="col">
+                        <div class="card h-100">
+                            {% set fname = 'assets/img/' + post.img_file %}
+                            {% set url_for = url_for('static', filename=fname) %}
+                            <img src="{{ url_for }}" class="card-img-top" alt="Post Image">
+                            <div class="card-body">
+                                <a href="/post/{{post.slug}}" class="text-decoration-none">
+                                    <h2 class="card-title fs-4">{{ post.title }}</h2>
+                                </a>
+                                <h3 class="card-subtitle mb-2 text-muted fs-5">{{post.tagline}}</h3>
+                                <p class="card-text">{{post.content[0:150] | safe}}... <a href="/post/{{post.slug}}"
+                                        class="btn btn-link btn-sm">Read More</a></p>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">Posted by <a href="/about">MHS</a> on {{post.date}}</small>
+                            </div>
                         </div>
                     </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pager-->
+                <div class="d-flex justify-content-between my-4">
+                    <a class="btn btn-primary text-uppercase" href="{{previous}}">← Previous</a>
+                    <a class="btn btn-primary text-uppercase" href="{{next}}">Next →</a>
                 </div>
             </div>
-        </header>
-        <!-- Main Content-->
-        <div class="container px-4 px-lg-5">
-            <div class="row gx-4 gx-lg-5 justify-content-center">
-                <div class="col-md-10 col-lg-8 col-xl-7">
-<!-- Todo: Fetch it using for loop from the data base -->
-                    <!-- Post preview-->
-        {% for post in posts %}
-
-          <div class="post-preview">
-               <a href="/post/{{post.slug}}">
-                <h2 class="post-title">{{ post.title }}</h2>
-                            <h3 class="post-subtitle">{{post.tagline}}</h3>
-               </a>
-
-            {{post.content[0:50]}}... 
-           <p class="post-meta">
-               Posted by
-                 <a href="#!">MHS</a>
-                         on {{post.date}}
-          </p>
-                    </div>
-         
-         <hr>
-        {% endfor %}            
-                    <!-- Divider-->
-                    <br class="my-4" />
-                    <!-- Pager-->
-                    <div class="d-flex justify-content-between mb-4">
-    <a class="btn btn-primary text-uppercase" href="{{previous}}">←Previous</a>
-    <a class="btn btn-primary text-uppercase" href="{{next}}">Next→</a>
+        </div>
+    </div>
 </div>
-                </div>
-            </div>
-  {% endblock %}
+
+{% endblock %}

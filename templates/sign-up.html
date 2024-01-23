@@ -19,7 +19,7 @@
     <!-- Custom styles for this template -->
     <style>
         body {
-            background-image: url('static/assets/img/sign-in-bg.jpg');
+            background-image: url("{{ url_for('static', filename='assets/img/sign-in-bg.jpg') }}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -101,7 +101,7 @@
             </div>
         </nav>
 
-        <form class="form-signup mx-auto mt-5" action="/signup" method="POST">
+        <form class="form-signup mx-auto mt-5" action="{{ url_for('auth.sign_up') }}" method="POST">
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             <div id="flash-container">
@@ -164,7 +164,7 @@
             </div>
             {{ form.submit(class="btn btn-md btn-success", type="submit", value="Signup")}}
             <div class="message">
-                <a href="/signin" class="text-black">Already have an account? Sign in</a>
+                <a href="{{ url_for('auth.signin') }}" class="text-black">Already have an account? Sign in</a>
             </div>
         </form>
     </div>
